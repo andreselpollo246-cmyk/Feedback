@@ -5,9 +5,7 @@ from typing import Optional, Any
 
 from ..database import get_db
 from ..models import Aprendiz, Instructor, Administracion, Ficha, ProgramaFormacion
-from ..auth import create_access_token  
-
-#IMPORT RELATIVO 
+from ..auth import create_access_token
 
 router = APIRouter()
 
@@ -27,7 +25,7 @@ class TokenResponse(BaseModel):
     programa: str | None = None
 
 @router.post("/login", response_model=TokenResponse)
-def login(datos: LoginRequest, db: Session = Depends(get_db)) -> dict[str, Any]: # Esto le dice a Pylance: "esta función devuelve un diccionario cuyas claves son texto (str), y cuyos valores pueden ser de cualquier tipo (Any)". Como tu return mezcla strings, enteros y None en un mismo diccionario, Any es la forma honesta de decir "no voy a restringir qué tipo de valor lleva cada clave". Any viene de from typing import Any.
+def login(datos: LoginRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
     rol = datos.rol.lower().strip()
     identificacion = datos.identificacion.strip()
     contrasena = datos.contrasena
@@ -102,6 +100,3 @@ def login(datos: LoginRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
         "ficha": ficha,
         "programa": programa
     }
-
-
-# Este sí era un bug de lógica, no de tipos. Tu TokenResponse (el modelo de respuesta que Pydantic usa para validar y serializar lo que devuelves) define el campo como ficha (minúscula). Si en el return pones "Ficha" (mayúscula), Pydantic no encuentra coincidencia exacta y ese dato se pierde silenciosamente — el frontend siempre recibiría ficha: null, aunque el aprendiz sí tuviera ficha asignada en la base de datos. Por eso lo corregimos a minúscula.

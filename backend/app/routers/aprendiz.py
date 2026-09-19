@@ -9,7 +9,7 @@ from ..database import get_db
 from ..auth import get_current_user
 from ..models import (
     Aprendiz, Instructor, Ficha, ProgramaFormacion,
-    AsignacionInstructor, Competencia, Trimestre, Evaluacion, detalleEvaluacion
+    AsignacionInstructor, Competencia, Trimestre, Evaluacion, DetalleEvaluacion
 )
 
 router = APIRouter()
@@ -202,8 +202,8 @@ def evaluar_instructor(
         # Ya existía: se actualiza y se reemplazan sus detalles.
         evaluacion.comentario = datos.comentario
         evaluacion.fecha = datetime.now(timezone.utc)
-        db.query(detalleEvaluacion).filter(
-            detalleEvaluacion.IdEvaluacion == evaluacion.idevaluacion
+        db.query(DetalleEvaluacion).filter(
+            DetalleEvaluacion.IdEvaluacion == evaluacion.idevaluacion
         ).delete()
     else:
         evaluacion = Evaluacion(
@@ -223,7 +223,7 @@ def evaluar_instructor(
         id_criterio = MAPA_CRITERIOS.get(criterio_nombre)
         if id_criterio:
             db.add(
-                detalleEvaluacion(
+                DetalleEvaluacion(
                     IdEvaluacion=evaluacion.idevaluacion,
                     IdCriterio=id_criterio,
                     Calificacion=int(calificacion),

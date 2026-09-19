@@ -17,9 +17,9 @@ from ..models import (
     Instructor,
     Ficha,
     ProgramaFormacion,
-    nivelformacion,
+    NivelFormacion,
     Competencia,
-    competenciainstructor,
+    CompetenciaInstructor,
     AsignacionInstructor,
     Trimestre,
     Evaluacion,
@@ -315,9 +315,9 @@ def listar_fichas(
     db: Session = Depends(get_db),
 ) -> List[FichaListItem]:
     filas = (
-        db.query(Ficha, ProgramaFormacion, nivelformacion)
+        db.query(Ficha, ProgramaFormacion, NivelFormacion)
         .join(ProgramaFormacion, Ficha.IdProgramaF == ProgramaFormacion.IdProgramaF)
-        .join(nivelformacion, Ficha.IdNivel == nivelformacion.IdNivel)
+        .join(NivelFormacion, Ficha.IdNivel == NivelFormacion.IdNivel)
         .order_by(Ficha.NumeroFicha)
         .all()
     )
@@ -389,15 +389,15 @@ def asignar_instructor(
 
     # Si el instructor no tenía relación con esta competencia, se crea automáticamente
     rel = (
-        db.query(competenciainstructor)
+        db.query(CompetenciaInstructor)
         .filter(
-            competenciainstructor.IdCompetencia == datos.idCompetencia,
-            competenciainstructor.IdInstructor == datos.idInstructor,
+            CompetenciaInstructor.IdCompetencia == datos.idCompetencia,
+            CompetenciaInstructor.IdInstructor == datos.idInstructor,
         )
         .first()
     )
     if not rel:
-        db.add(competenciainstructor(IdCompetencia=datos.idCompetencia, IdInstructor=datos.idInstructor))
+        db.add(CompetenciaInstructor(IdCompetencia=datos.idCompetencia, IdInstructor=datos.idInstructor))
 
     existente = (
         db.query(AsignacionInstructor)

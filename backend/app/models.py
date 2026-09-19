@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, List
 
-from sqlalchemy import String, Date, ForeignKey
+from sqlalchemy import String, Date, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -31,12 +31,13 @@ class Ficha(Base):
 
     programa: Mapped[Optional["ProgramaFormacion"]] = relationship(back_populates="fichas")
     aprendices: Mapped[List["Aprendiz"]] = relationship(back_populates="ficha")
+    asignaciones: Mapped[List["AsignacionInstructor"]] = relationship(back_populates="ficha")
 
 
 class Aprendiz(Base):
     __tablename__ = "aprendiz"
 
-    IdAprendiz: Mapped[int] = mapped_column(primary_key=True, index=True)   #Aquí le dices explícitamente a Python y a Pylance: "cuando accedas a una instancia (usuario.IdAprendiz), vas a recibir un int de verdad". Mapped[int] es la anotación de tipo; mapped_column(...) es la configuración real de la columna en la base de datos (tipo SQL, si es primary key, etc.). Con este cambio, usuario.IdAprendiz ya se ve como int normal, y por eso desaparecieron los errores de "no se puede asignar Column[int] a int | None".
+    IdAprendiz: Mapped[int] = mapped_column(primary_key=True, index=True)
     Nombres: Mapped[str] = mapped_column(String(100))
     Apellidos: Mapped[str] = mapped_column(String(100))
     FechaNacimiento: Mapped[Optional[date]] = mapped_column(Date)
@@ -48,6 +49,7 @@ class Aprendiz(Base):
     IdFicha: Mapped[Optional[int]] = mapped_column(ForeignKey("ficha.IdFicha"))
 
     ficha: Mapped[Optional["Ficha"]] = relationship(back_populates="aprendices")
+    evaluaciones: Mapped[List["Evaluacion"]] = relationship(back_populates="aprendiz")
 
 
 class Instructor(Base):
@@ -64,6 +66,16 @@ class Instructor(Base):
     NumDoc: Mapped[str] = mapped_column(String(20), unique=True, index=True)
     IdAdmin: Mapped[Optional[int]] = mapped_column(ForeignKey("administracion.IdAdmin"))
 
+    asignaciones: Mapped[List["AsignacionInstructor"]] = relationship(back_populates="instructor")
+    evaluaciones: Mapped[List["Evaluacion"]] = relationship(back_populates="instructor")
+
+
+class NivelFormacion(Base):
+    __tablename__ = "nivelformacion"
+
+    IdNivel: Mapped[int] = mapped_column(primary_key=True, index=True)
+    nivelformacion: Mapped[str] = mapped_column(String(50))
+
 
 class Administracion(Base):
     __tablename__ = "administracion"
@@ -76,6 +88,7 @@ class Administracion(Base):
     correo: Mapped[Optional[str]] = mapped_column(String(150), unique=True)
     Contrasena: Mapped[str] = mapped_column(String(255))
 
+
 class Trimestre(Base):
     __tablename__ = "trimestre"
 
@@ -83,61 +96,81 @@ class Trimestre(Base):
     NombreTrimestre: Mapped[str] = mapped_column(String(50))
     FechaInicio: Mapped[Optional[date]] = mapped_column(Date)
     FechaFin: Mapped[Optional[date]] = mapped_column(Date)
-    IdAdmin: Mapped[Optional[int]] = mapped_column(ForeignKey("administracion.IdAdmin"))
-    Estado: Mapped[Optional[str]] = mapped_column(String(20))
+    Estado: Mapped[bool] = mapped_column(Boolean, default=True)
 
-class AsignacionInstructor(Base):
-    __tablename__ = "asignacioninstructor"
+    asignaciones: Mapped[List["AsignacionInstructor"]] = relationship(back_populates="trimestre")
+    evaluaciones: Mapped[List["Evaluacion"]] = relationship(back_populates="trimestre")
 
-    IdAsignacion: Mapped[int] = mapped_column(primary_key=True, index=True)
-    IdInstructor: Mapped[Optional[int]] = mapped_column(ForeignKey("instructor.IdInstructor"))
-    IdFicha: Mapped[Optional[int]] = mapped_column(ForeignKey("ficha.IdFicha"))
-    IdCompetencia: Mapped[Optional[int]] = mapped_column(ForeignKey("competencia.IdCompetencia"))
-    IdTrimestre: Mapped[Optional[int]] = mapped_column(ForeignKey("trimestre.IdTrimestre"))
-    Habilitado: Mapped[Optional[bool]] = mapped_column(default=True)
 
 class Competencia(Base):
     __tablename__ = "competencia"
 
     IdCompetencia: Mapped[int] = mapped_column(primary_key=True, index=True)
-    Nombre_Competencia: Mapped[str] = mapped_column(String(100))
-    Descripcion: Mapped[Optional[str]] = mapped_column(String(255))
+    Nombre_Competencia: Mapped[str] = mapped_column(String(150))
     IdAdmin: Mapped[Optional[int]] = mapped_column(ForeignKey("administracion.IdAdmin"))
+
+    asignaciones: Mapped[List["AsignacionInstructor"]] = relationship(back_populates="competencia")
+
+
+class CompetenciaInstructor(Base):
+    __tablename__ = "competencia_instructor"
+
+    IdCompetencia: Mapped[int] = mapped_column(ForeignKey("competencia.IdCompetencia"), primary_key=True)
+    IdInstructor: Mapped[int] = mapped_column(ForeignKey("instructor.IdInstructor"), primary_key=True)
+
+
+class Criterio(Base):
+    __tablename__ = "criterio"
+
+    IdCriterio: Mapped[int] = mapped_column(primary_key=True, index=True)
+    TextoCriterio: Mapped[str] = mapped_column(String(255))
+
+
+class AsignacionInstructor(Base):
+    __tablename__ = "asignacion_instructor"
+
+    IdAsignacion: Mapped[int] = mapped_column(primary_key=True, index=True)
+    IdInstructor: Mapped[int] = mapped_column(ForeignKey("instructor.IdInstructor"))
+    IdFicha: Mapped[int] = mapped_column(ForeignKey("ficha.IdFicha"))
+    IdCompetencia: Mapped[int] = mapped_column(ForeignKey("competencia.IdCompetencia"))
+    IdTrimestre: Mapped[int] = mapped_column(ForeignKey("trimestre.IdTrimestre"))
+    Habilitado: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    instructor: Mapped["Instructor"] = relationship(back_populates="asignaciones")
+    ficha: Mapped["Ficha"] = relationship(back_populates="asignaciones")
+    competencia: Mapped["Competencia"] = relationship(back_populates="asignaciones")
+    trimestre: Mapped["Trimestre"] = relationship(back_populates="asignaciones")
+
 
 class Evaluacion(Base):
     __tablename__ = "evaluacion"
 
-    IdEvaluacion: Mapped[int] = mapped_column(primary_key=True, index=True)
+    idevaluacion: Mapped[int] = mapped_column(primary_key=True, index=True)
+    fecha: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    inicio: Mapped[Optional[date]] = mapped_column(Date)
+    fin: Mapped[Optional[date]] = mapped_column(Date)
+    comentario: Mapped[Optional[str]] = mapped_column(String(500))
+    evaluado: Mapped[bool] = mapped_column(Boolean, default=False)
     IdAprendiz: Mapped[Optional[int]] = mapped_column(ForeignKey("aprendiz.IdAprendiz"))
     IdInstructor: Mapped[Optional[int]] = mapped_column(ForeignKey("instructor.IdInstructor"))
     IdTrimestre: Mapped[Optional[int]] = mapped_column(ForeignKey("trimestre.IdTrimestre"))
-    FechaEvaluacion: Mapped[Optional[date]] = mapped_column(Date)
-    Comentarios: Mapped[Optional[str]] = mapped_column(String(255))
 
-class detalleEvaluacion(Base):
-    __tablename__ = "detalleevaluacion"
+    aprendiz: Mapped[Optional["Aprendiz"]] = relationship(back_populates="evaluaciones")
+    instructor: Mapped[Optional["Instructor"]] = relationship(back_populates="evaluaciones")
+    trimestre: Mapped[Optional["Trimestre"]] = relationship(back_populates="evaluaciones")
+    detalles: Mapped[List["DetalleEvaluacion"]] = relationship(back_populates="evaluacion")
 
-    IdDetalleEvaluacion: Mapped[int] = mapped_column(primary_key=True, index=True)
-    IdEvaluacion: Mapped[Optional[int]] = mapped_column(ForeignKey("evaluacion.IdEvaluacion"))
+
+class DetalleEvaluacion(Base):
+    __tablename__ = "detalle_evaluacion"
+
+    IdDetalle: Mapped[int] = mapped_column(primary_key=True, index=True)
+    IdEvaluacion: Mapped[Optional[int]] = mapped_column(ForeignKey("evaluacion.idevaluacion"))
     IdCriterio: Mapped[Optional[int]] = mapped_column(ForeignKey("criterio.IdCriterio"))
-    Calificacion: Mapped[Optional[int]] = mapped_column()
+    Calificacion: Mapped[Optional[int]]
 
-class nivelformacion(Base):
-    __tablename__ = "nivelformacion"
-
-    IdNivel: Mapped[int] = mapped_column(primary_key=True, index=True)
-    NombreNivel: Mapped[str] = mapped_column(String(50))
-    Descripcion: Mapped[Optional[str]] = mapped_column(String(255))
-    IdAdmin: Mapped[Optional[int]] = mapped_column(ForeignKey("administracion.IdAdmin"))
-
-class competenciainstructor(Base):
-    __tablename__ = "competenciainstructor"
-
-    IdCompetenciaInstructor: Mapped[int] = mapped_column(primary_key=True, index=True)
-    IdInstructor: Mapped[Optional[int]] = mapped_column(ForeignKey("instructor.IdInstructor"))
-    IdCompetencia: Mapped[Optional[int]] = mapped_column(ForeignKey("competencia.IdCompetencia"))
-    IdAdmin: Mapped[Optional[int]] = mapped_column(ForeignKey("administracion.IdAdmin"))
-
+    evaluacion: Mapped[Optional["Evaluacion"]] = relationship(back_populates="detalles")
+    criterio: Mapped[Optional["Criterio"]] = relationship()
 #Si models.py no tiene nada escrito, entonces Aprendiz, Instructor, etc. simplemente no existen como objetos Python
 
 # Optional[int] es literalmente un atajo de int | None. Le dice a Pylance: "esta variable puede contener un número entero, o puede estar vacía (None)". Es exactamente tu situación: al inicio de login() no sabes si el usuario existe, así que id_usuario arranca en None, y solo si se encuentra el usuario en la base de datos se llena con un número real.

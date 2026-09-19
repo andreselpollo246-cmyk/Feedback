@@ -16,7 +16,7 @@ from ..models import (
     Trimestre,
     Aprendiz,
     Evaluacion,
-    detalleEvaluacion,
+    DetalleEvaluacion,
 )
 
 router = APIRouter()
@@ -97,10 +97,10 @@ def dashboard_instructor(
 
         stats = (
             db.query(
-                func.avg(detalleEvaluacion.Calificacion).label("promedio"),
+                func.avg(DetalleEvaluacion.Calificacion).label("promedio"),
                 func.count(func.distinct(Evaluacion.idevaluacion)).label("total"),
             )
-            .join(detalleEvaluacion, Evaluacion.idevaluacion == detalleEvaluacion.IdEvaluacion)
+            .join(DetalleEvaluacion, Evaluacion.idevaluacion == DetalleEvaluacion.IdEvaluacion)
             .filter(
                 Evaluacion.IdInstructor == instructor.IdInstructor,
                 Evaluacion.IdTrimestre == trimestre.IdTrimestre,
