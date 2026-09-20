@@ -1,26 +1,25 @@
 import { useEffect, useState } from "react";
 import DashboardShell from "../components/DashboardShell";
+import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../api/client";
 
 function EstrellasFijas({ promedio }) {
   const llenas = Math.round(promedio);
   return (
-    <div className="stars-fixed" aria-label={`Promedio ${promedio} de 5`}>
+    <div className="d-flex gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
-        <svg key={n} viewBox="0 0 24 24" width="18" height="18">
-          <path
-            d="M12 2.6l2.86 5.94 6.44.77-4.72 4.5 1.24 6.53L12 17.3 6.18 20.34l1.24-6.53-4.72-4.5 6.44-.77z"
-            fill={n <= llenas ? "var(--color-accent)" : "none"}
-            stroke={n <= llenas ? "var(--color-accent)" : "var(--color-border)"}
-            strokeWidth="1.5"
-          />
-        </svg>
+        <i
+          key={n}
+          className={`bi ${n <= llenas ? "bi-star-fill" : "bi-star"}`}
+          style={{ color: n <= llenas ? "#ffc107" : "#dee2e6" }}
+        />
       ))}
     </div>
   );
 }
 
 export default function InstructorDashboard() {
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,66 +28,73 @@ export default function InstructorDashboard() {
     api
       .instructorDashboard()
       .then(setData)
-      .catch((err) =>
-        setError(err instanceof ApiError ? err.message : "No se pudo cargar tu información.")
-      )
+      .catch((err) => setError(err instanceof ApiError ? err.message : "No se pudo cargar tu información."))
       .finally(() => setLoading(false));
   }, []);
 
   const fichas = data ? Object.entries(data.fichas_data) : [];
 
   return (
-    <DashboardShell title="Mi desempeño por ficha">
+    <DashboardShell>
+      <div className="saludo-bar">
+        <p className="saludo-texto">
+          <i className="bi bi-bar-chart-line me-2"></i>
+          Hola, <span className="nombre-verde">{data?.nombre || user?.nombre}</span>
+        </p>
+        <p className="ficha-texto">Tu desempeño por ficha en el trimestre actual</p>
+      </div>
+
       {loading && <p className="state-message">Cargando...</p>}
       {error && <p className="state-message state-message--error">{error}</p>}
 
       {data && fichas.length === 0 && (
         <p className="state-message">
+          <i className="bi bi-inbox fs-1 text-muted me-2"></i>
           Todavía no tienes fichas asignadas en el trimestre activo.
         </p>
       )}
 
-      <div className="ficha-stats">
-        {fichas.map(([numeroFicha, stats]) => (
-          <article key={numeroFicha} className="ficha-card">
-            <header className="ficha-card__header">
-              <div>
-                <h3>Ficha {numeroFicha}</h3>
-                <p>{stats.programa}</p>
-                <p className="ficha-card__competencia">{stats.competencia}</p>
-              </div>
-              <div className="ficha-card__score">
-                <span className="ficha-card__score-number">{stats.promedio}</span>
-                <EstrellasFijas promedio={stats.promedio} />
-                <span className={`badge badge--${stats.rendimiento.toLowerCase()}`}>
-                  {stats.rendimiento}
-                </span>
-              </div>
-            </header>
-
-            <div className="ficha-card__bar-track">
-              <div
-                className="ficha-card__bar-fill"
-                style={{ width: `${stats.porcentaje}%` }}
-              />
+      {fichas.map(([numeroFicha, stats]) => (
+        <div key={numeroFicha} className="ficha-card">
+          <div className="ficha-card__header">
+            <div>
+              <span className="badge-ficha mb-2 d-inline-block">Ficha {numeroFicha}</span>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0.3rem 0" }}>{stats.programa}</h3>
+              <p style={{ color: "var(--verde)", fontWeight: 600, fontSize: "0.85rem" }}>{stats.competencia}</p>
             </div>
+            <div className="ficha-card__score">
+              <span className="ficha-card__score-number">{stats.promedio}</span>
+              <EstrellasFijas promedio={stats.promedio} />
+              <span className="badge-estado badge-evaluado">{stats.rendimiento}</span>
+            </div>
+          </div>
 
-            <p className="ficha-card__mensaje">{stats.mensaje}</p>
-            <p className="ficha-card__total">
-              {stats.total} evaluación{stats.total === 1 ? "" : "es"} recibida
-              {stats.total === 1 ? "" : "s"}
-            </p>
+          <div className="ficha-card__bar-track">
+            <div className="ficha-card__bar-fill" style={{ width: `${stats.porcentaje}%` }} />
+          </div>
 
-            {stats.comentarios.length > 0 && (
-              <div className="ficha-card__comentarios">
-                {stats.comentarios.map((c, i) => (
-                  <blockquote key={i}>“{c.texto}”</blockquote>
-                ))}
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
+          <p style={{ margin: "0 0 0.25rem", color: "#444" }}>
+            <i className="bi bi-lightbulb me-2"></i>{stats.mensaje}
+          </p>
+          <p style={{ color: "#888", fontSize: "0.85rem" }}>
+            <i className="bi bi-people me-2"></i>
+            {stats.total} evaluación{stats.total === 1 ? "" : "es"} recibida{stats.total === 1 ? "" : "s"}
+          </p>
+
+          {stats.comentarios.length > 0 && (
+            <div className="mt-3">
+              <p style={{ fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.5rem" }}>
+                <i className="bi bi-chat-square-text me-2"></i>Comentarios recientes
+              </p>
+              {stats.comentarios.map((c, i) => (
+                <div key={i} className="comentario-card">
+                  <p className="comentario-texto">"{c.texto}"</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
     </DashboardShell>
   );
 }

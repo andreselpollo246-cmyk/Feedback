@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DashboardShell from "../components/DashboardShell";
+import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../api/client";
 
 const TABS = [
@@ -12,10 +13,19 @@ const TABS = [
 ];
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [tab, setTab] = useState("resumen");
 
   return (
-    <DashboardShell title="Administración">
+    <DashboardShell>
+      <div className="saludo-bar">
+        <p className="saludo-texto">
+          <i className="bi bi-shield-lock-fill me-2"></i>
+          Hola, <span className="nombre-verde">{user?.nombre}</span>
+        </p>
+        <p className="ficha-texto">Panel de administración</p>
+      </div>
+
       <nav className="tabs">
         {TABS.map((t) => (
           <button
@@ -235,7 +245,7 @@ function AsignacionesTab() {
             required
           />
         </label>
-        <button className="button button--primary" type="submit">
+        <button className="btn-evaluar-instructor" type="submit">
           Asignar
         </button>
       </form>
@@ -268,7 +278,7 @@ function AsignacionesTab() {
                 <td>{a.trimestre}</td>
                 <td>{a.habilitado ? "Sí" : "No"}</td>
                 <td>
-                  <button className="button button--danger" onClick={() => eliminar(a.id)}>
+                  <button className="btn-tabla-accion" onClick={() => eliminar(a.id)}>
                     Eliminar
                   </button>
                 </td>
@@ -367,7 +377,7 @@ function CrearAprendizTab() {
       {error && <p className="state-message state-message--error">{error}</p>}
       {ok && <p className="state-message state-message--ok">{ok}</p>}
 
-      <button className="button button--primary" type="submit">Crear aprendiz</button>
+      <button className="btn-evaluar-instructor" type="submit">Crear aprendiz</button>
     </form>
   );
 }
@@ -478,7 +488,7 @@ function CrearInstructorTab() {
       {error && <p className="state-message state-message--error">{error}</p>}
       {ok && <p className="state-message state-message--ok">{ok}</p>}
 
-      <button className="button button--primary" type="submit">Crear instructor</button>
+      <button className="btn-evaluar-instructor" type="submit">Crear instructor</button>
     </form>
   );
 }
