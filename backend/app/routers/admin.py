@@ -296,6 +296,113 @@ def listar_instructores(
 
 
 # ======================
+# 4.3. Listar y crear programas de formación
+# ======================
+
+class ProgramaListItem(BaseModel):
+    id: int
+    nombre: str
+
+
+@router.get("/programas", response_model=List[ProgramaListItem])
+def listar_programas(
+    current_user: dict[str, Any] = Depends(requerir_admin),
+    db: Session = Depends(get_db),
+) -> List[ProgramaListItem]:
+    programas = db.query(ProgramaFormacion).order_by(ProgramaFormacion.NombrePrograma).all()
+    return [
+        ProgramaListItem(id=p.IdProgramaF, nombre=p.NombrePrograma) for p in programas
+    ]
+
+
+class CrearProgramaRequest(BaseModel):
+    nombrePrograma: str
+
+
+@router.post("/crear-programa")
+def crear_programa(
+    datos: CrearProgramaRequest,
+    current_user: dict[str, Any] = Depends(requerir_admin),
+    db: Session = Depends(get_db),
+):
+    nombre = datos.nombrePrograma.strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre del programa es obligatorio.")
+
+    existe = db.query(ProgramaFormacion).filter(ProgramaFormacion.NombrePrograma == nombre).first()
+    if existe:
+        raise HTTPException(status_code=409, detail="Ya existe un programa con ese nombre.")
+
+    id_admin = current_user["payload"].get("id_usuario")
+    db.add(ProgramaFormacion(NombrePrograma=nombre, IdAdmin=id_admin))
+    db.commit()
+
+    return {"success": True, "message": "Programa creado correctamente."}
+
+
+# ======================
+# 4.5. Crear ficha
+# ======================
+
+class CrearFichaRequest(BaseModel):
+    numeroFicha: str
+    inicioFormacion: date
+    finFormacion: date
+    idPrograma: int
+    modalidad: str = "Presencial"
+    idNivel: Optional[int] = None
+
+
+@router.post("/crear-ficha")
+def crear_ficha(
+    datos: CrearFichaRequest,
+    current_user: dict[str, Any] = Depends(requerir_admin),
+    db: Session = Depends(get_db),
+):
+    numero = datos.numeroFicha.strip()
+    if not numero:
+        raise HTTPException(status_code=400, detail="El número de ficha es obligatorio.")
+
+    if datos.finFormacion < datos.inicioFormacion:
+        raise HTTPException(
+            status_code=400,
+            detail="La fecha de fin no puede ser anterior a la fecha de inicio.",
+        )
+
+    existe = db.query(Ficha).filter(Ficha.NumeroFicha == numero).first()
+    if existe:
+        raise HTTPException(status_code=409, detail="Ya existe una ficha con ese número.")
+
+    programa = db.query(ProgramaFormacion).filter(
+        ProgramaFormacion.IdProgramaF == datos.idPrograma
+    ).first()
+    if not programa:
+        raise HTTPException(status_code=400, detail="El programa de formación seleccionado no existe.")
+
+    id_nivel = datos.idNivel
+    if not id_nivel:
+        # Igual que en Flask: si no se especifica nivel, usa "Técnico" por defecto.
+        nivel = db.query(NivelFormacion).filter(NivelFormacion.nivelformacion == "Técnico").first()
+        id_nivel = nivel.IdNivel if nivel else 1
+
+    id_admin = current_user["payload"].get("id_usuario")
+
+    nueva_ficha = Ficha(
+        NumeroFicha=numero,
+        InicioFormacion=datos.inicioFormacion,
+        FinFormacion=datos.finFormacion,
+        modalidad=datos.modalidad,
+        IdNivel=id_nivel,
+        IdProgramaF=datos.idPrograma,
+        IdAdmin=id_admin,
+    )
+    db.add(nueva_ficha)
+    db.commit()
+
+    return {"success": True, "message": "Ficha creada correctamente."}
+
+
+# ======================
 # 5. Listar fichas
 # ======================
 

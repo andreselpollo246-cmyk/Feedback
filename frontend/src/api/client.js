@@ -97,6 +97,11 @@ export const api = {
   adminDashboard: () => request("/api/admin/dashboard"),
   listarInstructores: () => request("/api/admin/instructores"),
   listarFichas: () => request("/api/admin/fichas"),
+  crearFicha: (datos) =>
+    request("/api/admin/crear-ficha", { method: "POST", body: datos }),
+  listarProgramas: () => request("/api/admin/programas"),
+  crearPrograma: (datos) =>
+    request("/api/admin/crear-programa", { method: "POST", body: datos }),
   listarCompetencias: () => request("/api/admin/competencias"),
   listarAsignaciones: () => request("/api/admin/asignaciones"),
   crearAprendiz: (datos) =>

@@ -120,39 +120,185 @@ function InstructoresTab() {
 
 function FichasTab() {
   const [items, setItems] = useState(null);
+  const [programas, setProgramas] = useState([]);
   const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [ok, setOk] = useState("");
 
-  useEffect(() => {
+  const [form, setForm] = useState({
+    numeroFicha: "",
+    inicioFormacion: "",
+    finFormacion: "",
+    idPrograma: "",
+    modalidad: "Presencial",
+  });
+
+  const [nuevoPrograma, setNuevoPrograma] = useState("");
+  const [creandoPrograma, setCreandoPrograma] = useState(false);
+
+  function cargarFichas() {
     api
       .listarFichas()
       .then(setItems)
       .catch((err) => setError(err instanceof ApiError ? err.message : "Error al cargar."));
+  }
+
+  function cargarProgramas() {
+    api.listarProgramas().then(setProgramas).catch(() => {});
+  }
+
+  useEffect(() => {
+    cargarFichas();
+    cargarProgramas();
   }, []);
 
-  if (error) return <p className="state-message state-message--error">{error}</p>;
-  if (!items) return <p className="state-message">Cargando...</p>;
+  async function crearFicha(e) {
+    e.preventDefault();
+    setFormError("");
+    setOk("");
+    try {
+      const res = await api.crearFicha({
+        ...form,
+        idPrograma: Number(form.idPrograma),
+      });
+      setOk(res.message);
+      setForm((f) => ({ ...f, numeroFicha: "", inicioFormacion: "", finFormacion: "" }));
+      cargarFichas();
+    } catch (err) {
+      setFormError(err instanceof ApiError ? err.message : "No se pudo crear la ficha.");
+    }
+  }
+
+  async function crearPrograma(e) {
+    e.preventDefault();
+    setFormError("");
+    setOk("");
+    try {
+      await api.crearPrograma({ nombrePrograma: nuevoPrograma });
+      setNuevoPrograma("");
+      setCreandoPrograma(false);
+      cargarProgramas();
+    } catch (err) {
+      setFormError(err instanceof ApiError ? err.message : "No se pudo crear el programa.");
+    }
+  }
 
   return (
-    <table className="data-table">
-      <thead>
-        <tr>
-          <th>Ficha</th>
-          <th>Programa</th>
-          <th>Nivel</th>
-          <th>Modalidad</th>
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((f) => (
-          <tr key={f.id}>
-            <td>{f.numero}</td>
-            <td>{f.programa}</td>
-            <td>{f.nivel}</td>
-            <td>{f.modalidad}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <>
+      <form className="inline-form" onSubmit={crearFicha}>
+        <label className="field field--compact">
+          <span className="field__label">Número de ficha</span>
+          <input
+            className="campo-input"
+            value={form.numeroFicha}
+            onChange={(e) => setForm((f) => ({ ...f, numeroFicha: e.target.value }))}
+            required
+          />
+        </label>
+        <label className="field field--compact">
+          <span className="field__label">Inicio de formación</span>
+          <input
+            type="date"
+            className="campo-input"
+            value={form.inicioFormacion}
+            onChange={(e) => setForm((f) => ({ ...f, inicioFormacion: e.target.value }))}
+            required
+          />
+        </label>
+        <label className="field field--compact">
+          <span className="field__label">Fin de formación</span>
+          <input
+            type="date"
+            className="campo-input"
+            value={form.finFormacion}
+            onChange={(e) => setForm((f) => ({ ...f, finFormacion: e.target.value }))}
+            required
+          />
+        </label>
+        <label className="field field--compact">
+          <span className="field__label">Programa</span>
+          <select
+            className="campo-input"
+            value={form.idPrograma}
+            onChange={(e) => setForm((f) => ({ ...f, idPrograma: e.target.value }))}
+            required
+          >
+            <option value="">Selecciona...</option>
+            {programas.map((p) => (
+              <option key={p.id} value={p.id}>{p.nombre}</option>
+            ))}
+          </select>
+        </label>
+        <label className="field field--compact">
+          <span className="field__label">Modalidad</span>
+          <select
+            className="campo-input"
+            value={form.modalidad}
+            onChange={(e) => setForm((f) => ({ ...f, modalidad: e.target.value }))}
+          >
+            <option value="Presencial">Presencial</option>
+            <option value="Virtual">Virtual</option>
+            <option value="Mixta">Mixta</option>
+          </select>
+        </label>
+        <button className="btn-evaluar-instructor" type="submit">Crear ficha</button>
+      </form>
+
+      {!creandoPrograma ? (
+        <button
+          type="button"
+          className="btn btn-secondary mb-3"
+          onClick={() => setCreandoPrograma(true)}
+        >
+          <i className="bi bi-plus-lg me-1"></i>¿No existe el programa? Créalo aquí
+        </button>
+      ) : (
+        <form className="inline-form" onSubmit={crearPrograma}>
+          <label className="field field--compact">
+            <span className="field__label">Nombre del nuevo programa</span>
+            <input
+              className="campo-input"
+              value={nuevoPrograma}
+              onChange={(e) => setNuevoPrograma(e.target.value)}
+              required
+            />
+          </label>
+          <button className="btn-evaluar-instructor" type="submit">Guardar programa</button>
+          <button type="button" className="btn btn-secondary" onClick={() => setCreandoPrograma(false)}>
+            Cancelar
+          </button>
+        </form>
+      )}
+
+      {formError && <p className="state-message state-message--error">{formError}</p>}
+      {ok && <p className="state-message state-message--ok">{ok}</p>}
+
+      {error && <p className="state-message state-message--error">{error}</p>}
+      {!items && !error && <p className="state-message">Cargando...</p>}
+
+      {items && (
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Ficha</th>
+              <th>Programa</th>
+              <th>Nivel</th>
+              <th>Modalidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((f) => (
+              <tr key={f.id}>
+                <td>{f.numero}</td>
+                <td>{f.programa}</td>
+                <td>{f.nivel}</td>
+                <td>{f.modalidad}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
   );
 }
 
