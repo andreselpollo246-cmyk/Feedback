@@ -1,0 +1,507 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --color-primary: #1B7A3D;
+  --color-primary-dark: #0F3D22;
+  --color-bg: #F6F8F6;
+  --color-surface: #FFFFFF;
+  --color-ink: #1A211C;
+  --color-ink-soft: #566158;
+  --color-border: #DCE3DE;
+  --color-accent: #D9A441;
+  --color-danger: #B5432B;
+  --color-danger-bg: #FBEBE7;
+  --color-ok-bg: #E9F5EC;
+
+  --font-display: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --radius: 10px;
+  --shadow-card: 0 1px 2px rgba(15, 61, 34, 0.06), 0 6px 20px rgba(15, 61, 34, 0.05);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  margin: 0;
+  color: var(--color-primary-dark);
+}
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; }
+
+/* ---------------- Login ---------------- */
+
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+
+.login__brand {
+  background: linear-gradient(160deg, var(--color-primary-dark), var(--color-primary) 130%);
+  color: #EFF6F1;
+  padding: 4rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.login__brand-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  width: fit-content;
+}
+
+.login__brand-title {
+  font-size: 2.4rem;
+  line-height: 1.2;
+  color: #FFFFFF;
+  max-width: 20ch;
+}
+
+.login__brand-copy {
+  max-width: 38ch;
+  line-height: 1.6;
+  color: #CFE3D5;
+}
+
+.login__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login__form {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.login__form-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.login__roles {
+  display: flex;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 4px;
+  gap: 4px;
+}
+
+.login__role {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.4rem;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.login__role--active {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  box-shadow: var(--shadow-card);
+}
+
+.login__error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .login { grid-template-columns: 1fr; }
+  .login__brand { padding: 2.5rem 1.75rem; }
+  .login__brand-title { font-size: 1.8rem; }
+}
+
+/* ---------------- Campos / botones ---------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.field--compact { min-width: 140px; }
+
+.field__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+.field__input {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.field__input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.field__input--textarea { resize: vertical; }
+
+.button {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.button--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.button--primary:hover { background: var(--color-primary-dark); }
+
+.button--danger {
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.button--block { width: 100%; }
+.button:disabled { opacity: 0.6; cursor: default; }
+
+/* ---------------- Shell (sidebar + contenido) ---------------- */
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+}
+
+.shell__sidebar {
+  background: var(--color-primary-dark);
+  color: #EAF3EC;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.shell__brand { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.shell__brand-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+}
+
+.shell__brand-sub { font-size: 0.85rem; color: #B9D2C0; }
+
+.shell__user { display: flex; align-items: center; gap: 0.75rem; }
+
+.shell__user-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+}
+
+.shell__user-name { font-weight: 600; }
+.shell__user-role { font-size: 0.8rem; color: #B9D2C0; }
+
+.shell__logout {
+  margin-top: auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #EAF3EC;
+  padding: 0.55rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.shell__content { padding: 2.5rem 3rem; max-width: 1100px; }
+.shell__title { font-size: 1.7rem; margin-bottom: 1.75rem; }
+
+@media (max-width: 800px) {
+  .shell { grid-template-columns: 1fr; }
+  .shell__sidebar { flex-direction: row; align-items: center; padding: 1rem 1.25rem; gap: 1rem; }
+  .shell__brand-sub { display: none; }
+  .shell__logout { margin-top: 0; margin-left: auto; }
+  .shell__content { padding: 1.5rem; }
+}
+
+/* ---------------- Estados ---------------- */
+
+.state-message { color: var(--color-ink-soft); }
+.state-message--error { color: var(--color-danger); }
+.state-message--ok { color: #1B7A3D; }
+
+/* ---------------- Aprendiz: resumen + tarjetas ---------------- */
+
+.summary-bar {
+  display: flex;
+  gap: 2.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.summary-bar__label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+}
+
+.summary-bar__value { font-weight: 700; }
+
+.instructor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.instructor-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+.instructor-card__avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.instructor-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.instructor-card__body h3 { font-size: 1.05rem; margin-bottom: 0.15rem; }
+.instructor-card__body p { margin: 0; color: var(--color-ink-soft); font-size: 0.88rem; }
+.instructor-card__ficha { margin-top: 0.2rem !important; }
+
+.badge {
+  align-self: flex-start;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badge--done { background: var(--color-ok-bg); color: var(--color-primary-dark); }
+.badge--excelente { background: var(--color-ok-bg); color: var(--color-primary-dark); }
+.badge--bueno { background: #FFF3DE; color: #8A5A15; }
+.badge--regular { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* ---------------- Star rating ---------------- */
+
+.star-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.star-rating__label { font-size: 0.92rem; }
+.star-rating__stars { display: flex; gap: 2px; }
+
+.star-rating__star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 0;
+}
+
+.stars-fixed { display: flex; gap: 1px; }
+
+/* ---------------- Modal de evaluación ---------------- */
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15, 61, 34, 0.35);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal__subtitle { color: var(--color-ink-soft); margin: 0.15rem 0 1.25rem; }
+.modal__ratings { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
+.modal__actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+
+/* ---------------- Instructor: fichas ---------------- */
+
+.ficha-stats { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.ficha-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.ficha-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.ficha-card__competencia { color: var(--color-primary); font-weight: 600; font-size: 0.85rem; margin-top: 0.2rem; }
+
+.ficha-card__score { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+.ficha-card__score-number { font-size: 1.6rem; font-weight: 800; font-family: var(--font-display); }
+
+.ficha-card__bar-track {
+  height: 6px;
+  background: var(--color-bg);
+  border-radius: 999px;
+  margin: 1rem 0 0.75rem;
+  overflow: hidden;
+}
+
+.ficha-card__bar-fill { height: 100%; background: var(--color-primary); }
+
+.ficha-card__mensaje { margin: 0 0 0.25rem; }
+.ficha-card__total { color: var(--color-ink-soft); font-size: 0.85rem; margin: 0; }
+
+.ficha-card__comentarios {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ficha-card__comentarios blockquote {
+  margin: 0;
+  padding-left: 0.85rem;
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+
+/* ---------------- Admin ---------------- */
+
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.tabs__item {
+  background: none;
+  border: none;
+  padding: 0.65rem 0.2rem;
+  margin-right: 1.25rem;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+}
+
+.tabs__item--active { color: var(--color-primary-dark); border-bottom-color: var(--color-primary); }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  box-shadow: var(--shadow-card);
+}
+
+.stat-card__number { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--color-primary-dark); }
+.stat-card__label { color: var(--color-ink-soft); }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.92rem;
+}
+
+.data-table th { background: var(--color-bg); color: var(--color-ink-soft); font-weight: 600; }
+.data-table tr:last-child td { border-bottom: none; }
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.stack-form { display: flex; flex-direction: column; gap: 1rem; max-width: 640px; }
+.stack-form__row { display: flex; gap: 1rem; flex-wrap: wrap; }

@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     DB_HOST: str = "127.0.0.1"
     DB_PORT: int = 3320
     DB_USER: str = "root"
-    DB_PASSWORD: str = ""
+    DB_PASSWORD: str = "2920"
     DB_NAME: str = "feedback"
     SECRET_KEY: str = "clave_super_secreta"
     ALGORITHM: str = "HS256"
